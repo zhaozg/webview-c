@@ -918,8 +918,9 @@ WEBVIEW_API int webview_init(struct webview *w) {
   return 0;
 }
 
-WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
+WEBVIEW_API int webview_loop_ex(struct webview *w, int blocking, int *fired) {
   MSG msg;
+  if (fired) *fired = 0;
   if (blocking) {
     if (GetMessage(&msg, 0, 0, 0)<0) return 0;
   } else {
@@ -930,7 +931,7 @@ WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
     return -1;
   case WM_COMMAND:
   case WM_KEYDOWN:
-  case WM_KEYUP: 
+  case WM_KEYUP:
     if (!webview_webview2_enabled) {
       HRESULT r = S_OK;
       IWebBrowser2 *webBrowser2;
@@ -954,7 +955,14 @@ WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
   }
   TranslateMessage(&msg);
   DispatchMessage(&msg);
+
+  if (fired) *fired = 1;
   return 0;
+}
+
+
+WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
+  return webview_loop_ex(w, blocking, NULL);
 }
 
 WEBVIEW_API int webview_eval(struct webview *w, const char *js) {

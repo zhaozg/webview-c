@@ -58,7 +58,7 @@ static id create_menu_item(id title, const char *action, const char *key) {
   id item = ((id(*)(id, SEL))objc_msgSend)((id)objc_getClass("NSMenuItem"), sel_registerName("alloc"));
 
   ((void(*)(id, SEL, id, SEL, id))objc_msgSend)(item, sel_registerName("initWithTitle:action:keyEquivalent:"), title, sel_registerName(action), get_nsstring(key));
-  
+
   ((void(*)(id, SEL))objc_msgSend)(item, sel_registerName("autorelease"));
 
   return item;
@@ -92,14 +92,14 @@ static void run_open_panel(id self, SEL cmd, id webView, id parameters,
       ((id(*)(id, SEL))objc_msgSend)(parameters, sel_registerName("allowsMultipleSelection")));
 
   ((void(*)(id, SEL, int))objc_msgSend)(openPanel, sel_registerName("setCanChooseFiles:"), 1);
-  
+
   ((id(*)(id, SEL, void (^)(id)))objc_msgSend)(
       openPanel, sel_registerName("beginWithCompletionHandler:"), ^(id result) {
         if (result == (id)NSModalResponseOK) {
 
           id urls = ((id(*)(id, SEL))objc_msgSend)(openPanel, sel_registerName("URLs"));
           completionHandler(urls);
-         
+
         } else {
           completionHandler(nil);
         }
@@ -389,7 +389,7 @@ WEBVIEW_API int webview_init(struct webview *w) {
   id navDel = ((id(*)(id, SEL))objc_msgSend)((id)__WKNavigationDelegate, sel_registerName("new"));
 
   w->priv.webview = ((id(*)(id, SEL))objc_msgSend)((id)objc_getClass("WKWebView"), sel_registerName("alloc"));
- 
+
   ((void(*)(id, SEL, CGRect, id))objc_msgSend)(w->priv.webview,
                sel_registerName("initWithFrame:configuration:"), r, config);
 
@@ -494,7 +494,7 @@ WEBVIEW_API int webview_init(struct webview *w) {
   return 0;
 }
 
-WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
+WEBVIEW_API int webview_loop_ex(struct webview *w, int blocking, int *fired) {
   id until = (blocking ? ((id(*)(id, SEL))objc_msgSend)((id)objc_getClass("NSDate"),
                                       sel_registerName("distantFuture"))
                        : ((id(*)(id, SEL))objc_msgSend)((id)objc_getClass("NSDate"),
@@ -516,7 +516,14 @@ WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
                  sel_registerName("sendEvent:"), event);
   }
 
+  if (fired)
+    *fired = event != NULL ? 1 : 0;
+
   return w->priv.should_exit;
+}
+
+WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
+  return webview_loop_ex(w, blocking, NULL);
 }
 
 WEBVIEW_API int webview_eval(struct webview *w, const char *js) {
