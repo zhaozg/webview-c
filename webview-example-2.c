@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   webview.external_invoke_cb = &invoke_cb;
   r = webview_init(&webview);
   do {
-    r = webview_loop(&webview, 1);
+    r = webview_loop(&webview, 1, NULL);
   } while (r == 0);
   return 0;
 }
