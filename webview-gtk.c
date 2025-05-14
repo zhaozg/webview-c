@@ -155,9 +155,15 @@ WEBVIEW_API int webview_init(struct webview *w) {
   return 0;
 }
 
-WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
+WEBVIEW_API int webview_loop_ex(struct webview *w, int blocking, int *fired) {
+  if (fired)
+    *fired = blocking ? 1 : gtk_events_pending();
   gtk_main_iteration_do(blocking);
   return w->priv.should_exit;
+}
+
+WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
+  return webview_loop_ex(w, blocking, NULL);
 }
 
 WEBVIEW_API void webview_set_title(struct webview *w, const char *title) {

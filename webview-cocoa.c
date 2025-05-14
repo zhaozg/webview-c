@@ -494,7 +494,7 @@ WEBVIEW_API int webview_init(struct webview *w) {
   return 0;
 }
 
-WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
+WEBVIEW_API int webview_loop_ex(struct webview *w, int blocking, int *fired) {
   id until = (blocking ? ((id(*)(id, SEL))objc_msgSend)((id)objc_getClass("NSDate"),
                                       sel_registerName("distantFuture"))
                        : ((id(*)(id, SEL))objc_msgSend)((id)objc_getClass("NSDate"),
@@ -516,7 +516,14 @@ WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
                  sel_registerName("sendEvent:"), event);
   }
 
+  if (fired)
+    *fired = event != NULL ? 1 : 0;
+
   return w->priv.should_exit;
+}
+
+WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
+  return webview_loop_ex(w, blocking, NULL);
 }
 
 WEBVIEW_API int webview_eval(struct webview *w, const char *js) {

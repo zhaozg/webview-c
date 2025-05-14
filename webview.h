@@ -139,6 +139,7 @@ WEBVIEW_API int webview_run(const char *title, const char *url, int width,
                         int height, int resizable);
 
 WEBVIEW_API int webview_init(struct webview *w);
+WEBVIEW_API int webview_loop_ex(struct webview *w, int blocking, int *fired);
 WEBVIEW_API int webview_loop(struct webview *w, int blocking);
 WEBVIEW_API int webview_eval(struct webview *w, const char *js);
 WEBVIEW_API int webview_inject_css(struct webview *w, const char *css);
